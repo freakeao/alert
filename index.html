@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlertSalon - App Móvil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="bg-gray-100 font-sans flex flex-col md:flex-row h-screen overflow-hidden">
+
+    <div id="pantalla-auth" class="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-xl shadow-lg overflow-hidden p-6 md:p-8 border border-gray-200">
+            <h2 id="titulo-auth" class="text-xl md:text-2xl font-bold text-gray-800 text-center mb-1">Acceso AlertSalon</h2>
+            <p class="text-xs text-gray-500 text-center mb-6">Uso institucional. Ingrese con su correo electrónico.</p>
+
+            <form id="form-auth" class="space-y-4">
+                <div id="div-nombre" class="hidden">
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Nombre o Cargo</label>
+                    <input type="text" id="auth-nombre" placeholder="Ej: Profesor Carlos"
+                        class="w-full p-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Usuario</label>
+                    <input type="text" id="auth-usuario" placeholder="Ej: carlosm o admin" required
+                        class="w-full p-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <div id="div-email" class="hidden">
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Correo Electrónico</label>
+                    <input type="email" id="auth-email" placeholder="usuario@correo.com"
+                        class="w-full p-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Contraseña</label>
+                    <input type="password" id="auth-pass" placeholder="Mínimo 4 caracteres" required
+                        class="w-full p-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <button type="submit" id="btn-auth"
+                    class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 px-4 rounded-lg transition cursor-pointer text-sm">
+                    Ingresar al Sistema
+                </button>
+            </form>
+            <p id="toggle-text" class="text-xs text-center mt-5 text-gray-600">
+                ¿No tienes cuenta? <a href="#" onclick="toggleAuthMode()" class="text-amber-600 hover:underline">Regístrate aquí</a>
+            </p>
+        </div>
+    </div>
+
+    <aside id="menu-app"
+        class="hidden w-full md:w-64 bg-slate-800 text-white flex flex-col justify-between z-10 shadow-md">
+        <div>
+            <div
+                class="p-4 bg-slate-950 font-bold text-lg flex items-center justify-between text-amber-400 border-b border-slate-800">
+                <span class="flex items-center gap-2"><i data-lucide="wrench"></i> AlertSalon</span>
+                <button onclick="cerrarSesion()" class="md:hidden text-red-400 p-1">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <nav
+                class="p-2 md:p-4 flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-x-visible whitespace-nowrap md:whitespace-normal scrollbar-none">
+                <button onclick="cambiarSeccion('inicio')"
+                    class="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-700 text-amber-400 font-medium transition cursor-pointer text-sm md:text-base">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4 md:w-5 md:h-5"></i> Inicio
+                </button>
+                <button onclick="cambiarSeccion('registrar')"
+                    class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition cursor-pointer text-sm md:text-base">
+                    <i data-lucide="plus-circle" class="w-4 h-4 md:w-5 md:h-5"></i> Reportar
+                </button>
+                <button onclick="cambiarSeccion('mis-reportes')"
+                    class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition cursor-pointer text-sm md:text-base">
+                    <i data-lucide="folder-open" class="w-4 h-4 md:w-5 md:h-5"></i> Mis Reportes
+                </button>
+                <button onclick="cambiarSeccion('reportes')"
+                    class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition cursor-pointer text-sm md:text-base">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 md:w-5 md:h-5"></i> Gráficos
+                </button>
+                <button onclick="cambiarSeccion('seguridad')" id="menu-seguridad"
+                    class="hidden flex items-center gap-2 px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition cursor-pointer text-sm md:text-base">
+                    <i data-lucide="shield-check" class="w-4 h-4 md:w-5 md:h-5"></i> Usuarios
+                </button>
+                <button onclick="cambiarSeccion('casos')" id="menu-casos"
+                    class="hidden flex items-center gap-2 px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition cursor-pointer text-sm md:text-base">
+                    <i data-lucide="list-todo" class="w-4 h-4 md:w-5 md:h-5"></i> Gestión
+                </button>
+            </nav>
+        </div>
+        <div class="hidden md:block p-4 border-t border-slate-700">
+            <button onclick="cerrarSesion()"
+                class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white transition text-left font-medium cursor-pointer">
+                <i data-lucide="log-out"></i> Cerrar Sesión
+            </button>
+        </div>
+    </aside>
+
+    <main id="contenido-app" class="hidden flex-1 flex flex-col overflow-y-auto">
+        <header
+            class="bg-white shadow-sm h-14 md:h-16 flex items-center justify-between px-4 md:px-8 border-b border-gray-200 shrink-0">
+            <h1 id="titulo-pagina" class="text-base md:text-xl font-bold text-gray-800">Panel / Resumen</h1>
+            <div class="relative cursor-pointer p-2 rounded-full hover:bg-gray-100" onclick="cambiarSeccion('inicio')">
+                <i data-lucide="bell" class="text-gray-600 w-5 h-5"></i>
+                <span
+                    class="absolute top-1 right-1 bg-amber-500 w-2.5 h-2.5 rounded-full ring-2 ring-white animate-pulse"></span>
+            </div>
+        </header>
+
+        <div class="p-4 md:p-8 flex-1">
+
+            <section id="sec-inicio" class="seccion-contenido space-y-4 md:space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                    <div
+                        class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs md:text-sm text-gray-500 font-medium">Daños Pendientes</p>
+                            <h3 id="conteo-pendientes" class="text-2xl md:text-3xl font-bold text-gray-800 mt-1">0</h3>
+                        </div>
+                        <div class="bg-red-100 p-3 rounded-lg text-red-600"><i data-lucide="alert-triangle"></i></div>
+                    </div>
+                    <div
+                        class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs md:text-sm text-gray-500 font-medium">En Reparación</p>
+                            <h3 id="conteo-reparacion" class="text-2xl md:text-3xl font-bold text-gray-800 mt-1">2</h3>
+                        </div>
+                        <div class="bg-amber-100 p-3 rounded-lg text-amber-600"><i data-lucide="hammer"></i></div>
+                    </div>
+                    <div
+                        class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs md:text-sm text-gray-500 font-medium">Resueltos</p>
+                            <h3 id="conteo-resueltos" class="text-2xl md:text-3xl font-bold text-gray-800 mt-1">5</h3>
+                        </div>
+                        <div class="bg-green-100 p-3 rounded-lg text-green-600"><i data-lucide="check-circle-2"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-200">
+                    <h2 class="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4 flex items-center gap-2">
+                        <i data-lucide="bell-ring" class="text-amber-500"></i> Últimas Notificaciones
+                    </h2>
+                    <div class="space-y-3" id="lista-notificaciones"></div>
+                </div>
+            </section>
+
+            <section id="sec-registrar"
+                class="seccion-contenido hidden max-w-2xl bg-white p-5 md:p-8 rounded-xl shadow-sm border border-gray-200 mx-auto">
+                <h2 class="text-lg md:text-xl font-bold text-gray-800 mb-4 md:mb-6">Reporte de Daños</h2>
+                <form id="form-anomalia" onsubmit="guardarReporte(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs md:text-sm font-medium text-gray-700 mb-1">Área o Salón
+                            Afectado</label>
+                        <input type="text" id="area" placeholder="Ej. Aula 3-A, Laboratorio" required
+                            class="w-full p-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs md:text-sm font-medium text-gray-700 mb-1">Tipo de Daño</label>
+                        <select id="tipo"
+                            class="w-full p-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-amber-400 focus:outline-none">
+                            <option>Problema Eléctrico</option>
+                            <option>Falla de Mobiliario (Mesas/Sillas)</option>
+                            <option>Infraestructura (Paredes, Ventanas)</option>
+                            <option>Falla de Red / Internet</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs md:text-sm font-medium text-gray-700 mb-1">Evidencia (Foto opcional)</label>
+                        <input type="file" id="evidencia" accept="image/*"
+                            class="w-full p-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:outline-none bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs md:text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                        <textarea id="descripcion" rows="4" placeholder="Describe detalladamente..." required
+                            class="w-full p-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:outline-none"></textarea>
+                    </div>
+                    <button type="submit"
+                        class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-3 px-4 rounded-lg transition shadow-md cursor-pointer text-sm md:text-base">
+                        Enviar Reporte y Notificar
+                    </button>
+                </form>
+            </section>
+
+            <section id="sec-mis-reportes" class="seccion-contenido hidden space-y-6">
+                <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-200 overflow-x-auto mx-auto max-w-4xl">
+                    <h2 class="text-base md:text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i data-lucide="folder-open" class="text-amber-500"></i> Mis Reportes Enviados
+                    </h2>
+                    <table class="w-full text-left border-collapse min-w-[600px]">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-600 text-xs md:text-sm border-b border-gray-200">
+                                <th class="p-3 w-2/3">Detalle de mi Reporte</th>
+                                <th class="p-3">Estado actual</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-mis-reportes" class="text-gray-700 text-xs md:text-sm divide-y divide-gray-100">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="sec-reportes" class="seccion-contenido hidden space-y-6">
+                <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-200 max-w-xl mx-auto">
+                    <h2 class="text-base md:text-lg font-bold text-gray-800 mb-4">Frecuencia de Daños</h2>
+                    <div class="relative w-full h-64 md:h-auto">
+                        <canvas id="graficoDaños"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-seguridad" class="seccion-contenido hidden space-y-6">
+                <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-200 overflow-x-auto">
+                    <h2 class="text-base md:text-lg font-bold text-gray-800 mb-4">Historial de Seguridad</h2>
+                    <table class="w-full text-left border-collapse min-w-[400px]">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-600 text-xs md:text-sm border-b border-gray-200">
+                                <th class="p-3">Usuario (Nickname)</th>
+                                <th class="p-3">Correo Electrónico</th>
+                                <th class="p-3">Estatus</th>
+                                <th class="p-3 text-right" id="col-acciones" style="display: none;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-usuarios" class="text-gray-700 text-xs md:text-sm divide-y divide-gray-100">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="sec-casos" class="seccion-contenido hidden space-y-6">
+                <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-200 overflow-x-auto">
+                    <h2 class="text-base md:text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i data-lucide="list-todo" class="text-amber-500"></i> Gestión de Casos Reportados
+                    </h2>
+                    <table class="w-full text-left border-collapse min-w-[700px]">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-600 text-xs md:text-sm border-b border-gray-200">
+                                <th class="p-3 w-1/2">Detalle del Reporte</th>
+                                <th class="p-3">Estado actual</th>
+                                <th class="p-3 text-right">Acciones Directas</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-casos" class="text-gray-700 text-xs md:text-sm divide-y divide-gray-100">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // BASE DE DATOS LOCALES
+        let usuarios = JSON.parse(localStorage.getItem('alert_users')) || [
+            { nombre: 'Prof. Carlos Mendoza', usuario: 'cmendoza', email: 'carlos@gmail.com', pass: '1234', rol: 'usuario' }
+        ];
+        let reportes = JSON.parse(localStorage.getItem('alert_reports')) || [];
+        
+        // Limpieza automática de los datos de prueba (mockup) que inserté anteriormente
+        const reportesReales = reportes.filter(r => r.operador !== 'Sistema' && r.operador !== 'Mantenimiento' && r.operador !== 'Soporte TI');
+        if (reportesReales.length !== reportes.length) {
+            reportes = reportesReales;
+            localStorage.setItem('alert_reports', JSON.stringify(reportes));
+        }
+
+        let sesionActiva = JSON.parse(sessionStorage.getItem('alert_session'));
+
+        const authPantalla = document.getElementById('pantalla-auth');
+        const menuApp = document.getElementById('menu-app');
+        const contenidoApp = document.getElementById('contenido-app');
+        const authForm = document.getElementById('form-auth');
+
+        let isLoginMode = true;
+
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            const divNombre = document.getElementById('div-nombre');
+            const divEmail = document.getElementById('div-email');
+            const btnAuth = document.getElementById('btn-auth');
+            const toggleText = document.getElementById('toggle-text');
+            const tituloAuth = document.getElementById('titulo-auth');
+            
+            if (isLoginMode) {
+                divNombre.classList.add('hidden');
+                divEmail.classList.add('hidden');
+                document.getElementById('auth-email').required = false;
+                btnAuth.innerText = "Ingresar al Sistema";
+                toggleText.innerHTML = '¿No tienes cuenta? <a href="#" onclick="toggleAuthMode()" class="text-amber-600 hover:underline">Regístrate aquí</a>';
+                tituloAuth.innerText = "Acceso AlertSalon";
+            } else {
+                divNombre.classList.remove('hidden');
+                divEmail.classList.remove('hidden');
+                document.getElementById('auth-email').required = true;
+                btnAuth.innerText = "Registrarse";
+                toggleText.innerHTML = '¿Ya tienes cuenta? <a href="#" onclick="toggleAuthMode()" class="text-amber-600 hover:underline">Inicia Sesión</a>';
+                tituloAuth.innerText = "Registro AlertSalon";
+            }
+        }
+
+        // LOGICA DE ACCESO CON FILTRO .COM O .NET Y ADMIN
+        authForm.onsubmit = (e) => {
+            e.preventDefault();
+            let inputNombre = document.getElementById('auth-nombre').value.trim();
+            const inputUsuario = document.getElementById('auth-usuario').value.trim().toLowerCase();
+            const inputEmail = document.getElementById('auth-email').value.trim().toLowerCase();
+            const pass = document.getElementById('auth-pass').value;
+
+            // CASO ESPECIAL ADMIN
+            if (inputUsuario === 'admin' && pass === 'admin') {
+                let adminUser = { nombre: 'Administrador Principal', usuario: 'admin', rol: 'admin' };
+                sessionStorage.setItem('alert_session', JSON.stringify(adminUser));
+                alert("¡Identidad verificada! Bienvenido, Administrador");
+                location.reload();
+                return;
+            }
+
+
+            if (pass.length < 4) {
+                alert("La contraseña debe tener un mínimo de 4 caracteres.");
+                return;
+            }
+
+            // Buscar si ya existe el usuario o correo antiguo en la base
+            let usuarioExistente = usuarios.find(u => u.usuario === inputUsuario || (!u.usuario && u.email === inputUsuario));
+
+            if (isLoginMode) {
+                if (!usuarioExistente) {
+                    alert("El usuario no existe. Por favor, regístrese primero.");
+                    return;
+                }
+                if (usuarioExistente.pass !== pass) {
+                    alert("Contraseña incorrecta.");
+                    return;
+                }
+                // Guardar sesión e ingresar
+                sessionStorage.setItem('alert_session', JSON.stringify(usuarioExistente));
+                alert("¡Identidad verificada! Bienvenido, " + usuarioExistente.nombre);
+                location.reload();
+            } else {
+                // Modo Registro
+                if (usuarioExistente) {
+                    alert("Este nombre de usuario ya está en uso. Elija otro.");
+                    return;
+                }
+                
+                const filtroCorreo = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|net)$/;
+                if (!filtroCorreo.test(inputEmail)) {
+                    alert("Por favor ingrese un correo válido que termine en .com o .net");
+                    return;
+                }
+
+                let correoExistente = usuarios.find(u => u.email === inputEmail);
+                if (correoExistente) {
+                    alert("Este correo electrónico ya está registrado. Inicie sesión o utilice otro.");
+                    return;
+                }
+
+                if (!inputNombre || !inputUsuario || !inputEmail) {
+                    alert("Todos los campos son obligatorios para registrarse.");
+                    return;
+                }
+
+                const nuevoUsuario = { nombre: inputNombre, usuario: inputUsuario, email: inputEmail, pass: pass, rol: 'usuario' };
+                usuarios.push(nuevoUsuario);
+                localStorage.setItem('alert_users', JSON.stringify(usuarios));
+                alert("¡Registro exitoso! Ahora puede iniciar sesión con su usuario y contraseña.");
+                
+                // Limpiar contraseña y cambiar a modo login
+                document.getElementById('auth-pass').value = '';
+                toggleAuthMode();
+            }
+        };
+
+        function verificarBloqueo() {
+            if (sesionActiva) {
+                authPantalla.style.display = 'none';
+                menuApp.classList.remove('hidden');
+                contenidoApp.classList.remove('hidden');
+                
+                if (sesionActiva.rol === 'admin') {
+                    document.getElementById('menu-seguridad').classList.remove('hidden');
+                    document.getElementById('menu-seguridad').classList.add('flex');
+                    document.getElementById('menu-casos').classList.remove('hidden');
+                    document.getElementById('menu-casos').classList.add('flex');
+                }
+
+                actualizarTodo();
+            }
+        }
+
+        function cerrarSesion() {
+            sessionStorage.removeItem('alert_session');
+            location.reload();
+        }
+
+        function cambiarSeccion(idSeccion) {
+            document.querySelectorAll('.seccion-contenido').forEach(sec => {
+                sec.classList.add('hidden');
+            });
+            document.getElementById('sec-' + idSeccion).classList.remove('hidden');
+
+            const titulos = {
+                inicio: "Panel / Resumen",
+                registrar: "Registrar Anomalía",
+                'mis-reportes': "Mis Reportes",
+                reportes: "Estadísticas",
+                seguridad: "Módulo Seguridad",
+                casos: "Gestión Administrativa de Casos"
+            };
+            document.getElementById('titulo-pagina').innerText = titulos[idSeccion];
+        }
+
+        function guardarReporte(e) {
+            e.preventDefault();
+            const area = document.getElementById('area').value.trim();
+            const tipo = document.getElementById('tipo').value;
+            const desc = document.getElementById('descripcion').value.trim();
+            const evidenciaInput = document.getElementById('evidencia');
+
+            const procesar = (imagenBase64) => {
+                const nuevoReporte = {
+                    area,
+                    tipo,
+                    desc,
+                    estado: 'Pendiente',
+                    operador: sesionActiva.nombre,
+                    fecha: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    imagen: imagenBase64
+                };
+
+                reportes.unshift(nuevoReporte);
+                localStorage.setItem('alert_reports', JSON.stringify(reportes));
+
+                alert("¡Reporte archivado con éxito!");
+                document.getElementById('form-anomalia').reset();
+                actualizarTodo();
+                cambiarSeccion('inicio');
+            };
+
+            if (evidenciaInput && evidenciaInput.files && evidenciaInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    procesar(evt.target.result);
+                };
+                reader.readAsDataURL(evidenciaInput.files[0]);
+            } else {
+                procesar(null);
+            }
+        }
+
+        function actualizarTodo() {
+            const pendientes = reportes.filter(r => !r.estado || r.estado === 'Pendiente').length;
+            const enReparacion = reportes.filter(r => r.estado === 'En Reparación').length;
+            const resueltos = reportes.filter(r => r.estado === 'Resuelto').length;
+
+            document.getElementById('conteo-pendientes').innerText = pendientes;
+            document.getElementById('conteo-reparacion').innerText = enReparacion;
+            document.getElementById('conteo-resueltos').innerText = resueltos;
+
+            const lista = document.getElementById('lista-notificaciones');
+            lista.innerHTML = reportes.length ? '' : '<p class="text-sm text-gray-400 p-4 text-center">No hay anomalías reportadas por el momento.</p>';
+
+            reportes.forEach((r, idx) => {
+                let colorBg = 'bg-red-50';
+                let colorBorder = 'border-red-500';
+                let colorText = 'text-red-600';
+                let icon = 'octagon-alert';
+                
+                if (r.estado === 'En Reparación') {
+                    colorBg = 'bg-amber-50';
+                    colorBorder = 'border-amber-500';
+                    colorText = 'text-amber-600';
+                    icon = 'hammer';
+                } else if (r.estado === 'Resuelto') {
+                    colorBg = 'bg-green-50';
+                    colorBorder = 'border-green-500';
+                    colorText = 'text-green-600';
+                    icon = 'check-circle-2';
+                }
+
+                const item = document.createElement('div');
+                item.className = `flex items-start gap-3 p-3 ${colorBg} border-l-4 ${colorBorder} rounded-r-lg`;
+                item.innerHTML = `
+                    <div class="${colorText} mt-0.5"><i data-lucide="${icon}" class="w-4 h-4 md:w-5 md:h-5"></i></div>
+                    <div class="flex-1">
+                        <p class="font-semibold text-gray-800 text-xs md:text-sm">REPORTE ${r.estado.toUpperCase()}</p>
+                        <p class="text-gray-600 text-xs md:text-sm mt-0.5"><b>${r.area}</b> - ${r.tipo}: ${r.desc}</p>
+                        ${r.imagen ? `<div class="mt-2"><a href="${r.imagen}" target="_blank" class="text-blue-500 hover:underline text-xs flex items-center gap-1"><i data-lucide="image" class="w-3 h-3"></i> Ver evidencia</a></div>` : ''}
+                        ${r.respuesta ? `<div class="mt-2 bg-white/60 p-2 rounded-md border border-gray-200 text-xs text-gray-700 shadow-sm"><span class="font-bold text-amber-600">Respuesta Oficial:</span> ${r.respuesta}</div>` : ''}
+                        <span class="text-[10px] md:text-xs text-gray-400 block mt-1">A las ${r.fecha} | Por: ${r.operador}</span>
+                    </div>
+                `;
+                lista.appendChild(item);
+            });
+
+            const tablaCasos = document.getElementById('tabla-casos');
+            const tablaMisReportes = document.getElementById('tabla-mis-reportes');
+            
+            if (tablaMisReportes && sesionActiva) {
+                let misRep = reportes.filter(r => r.operador === sesionActiva.nombre);
+                tablaMisReportes.innerHTML = misRep.length ? '' : '<tr><td colspan="2" class="p-4 text-center text-gray-500">No has enviado ningún reporte</td></tr>';
+                misRep.forEach(r => {
+                    let colorEstado = r.estado === 'Resuelto' ? 'bg-green-100 text-green-700 border border-green-200' : (r.estado === 'En Reparación' ? 'bg-amber-100 text-amber-700 border border-amber-200' : 'bg-red-100 text-red-700 border border-red-200');
+                    tablaMisReportes.innerHTML += `
+                        <tr>
+                            <td class="p-3">
+                                <p class="font-bold text-sm text-gray-800">${r.area} <span class="font-normal text-xs text-gray-500">(${r.tipo})</span></p>
+                                <p class="text-xs text-gray-600 mt-1">${r.desc}</p>
+                                <p class="text-[10px] text-gray-400 mt-1">${r.fecha}</p>
+                                ${r.imagen ? `<div class="mt-2"><a href="${r.imagen}" target="_blank" class="text-blue-500 hover:underline text-xs flex items-center gap-1"><i data-lucide="image" class="w-3 h-3"></i> Ver evidencia</a></div>` : ''}
+                                ${r.respuesta ? `<p class="text-xs mt-2 p-1.5 bg-gray-50 border border-gray-200 rounded text-gray-700"><b>Respuesta:</b> ${r.respuesta}</p>` : ''}
+                            </td>
+                            <td class="p-3">
+                                <span class="px-2.5 py-1 text-xs font-semibold rounded-full ${colorEstado}">${r.estado}</span>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+
+            if (tablaCasos) {
+                tablaCasos.innerHTML = reportes.length ? '' : '<tr><td colspan="3" class="p-4 text-center text-gray-500">No hay casos registrados</td></tr>';
+                reportes.forEach((r, idx) => {
+                    let colorEstado = r.estado === 'Resuelto' ? 'bg-green-100 text-green-700 border border-green-200' : (r.estado === 'En Reparación' ? 'bg-amber-100 text-amber-700 border border-amber-200' : 'bg-red-100 text-red-700 border border-red-200');
+                    
+                    let nextState = r.estado === 'Pendiente' ? 'En Reparación' : (r.estado === 'En Reparación' ? 'Resuelto' : 'Pendiente');
+                    let nextIcon = r.estado === 'Pendiente' ? 'hammer' : (r.estado === 'En Reparación' ? 'check-circle-2' : 'rotate-ccw');
+                    let nextTitle = `Cambiar estado a: ${nextState}`;
+
+                    tablaCasos.innerHTML += `
+                        <tr>
+                            <td class="p-3">
+                                <p class="font-bold text-sm text-gray-800">${r.area} <span class="font-normal text-xs text-gray-500">(${r.tipo})</span></p>
+                                <p class="text-xs text-gray-600 mt-1">${r.desc}</p>
+                                <p class="text-[10px] text-gray-400 mt-1">Reportado por: @${r.operador} - ${r.fecha}</p>
+                                ${r.imagen ? `<div class="mt-2"><a href="${r.imagen}" target="_blank" class="text-blue-500 hover:underline text-xs flex items-center gap-1"><i data-lucide="image" class="w-3 h-3"></i> Ver evidencia</a></div>` : ''}
+                                ${r.respuesta ? `<p class="text-xs mt-2 p-1.5 bg-gray-50 border border-gray-200 rounded text-gray-700"><b>Respuesta:</b> ${r.respuesta}</p>` : ''}
+                            </td>
+                            <td class="p-3">
+                                <span class="px-2.5 py-1 text-xs font-semibold rounded-full ${colorEstado}">${r.estado}</span>
+                            </td>
+                            <td class="p-3 text-right">
+                                <button onclick="avanzarEstado(${idx})" class="text-slate-600 hover:text-amber-600 bg-gray-50 hover:bg-amber-50 p-1.5 rounded-md transition cursor-pointer mr-1" title="${nextTitle}">
+                                    <i data-lucide="${nextIcon}" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="responderCaso(${idx})" class="text-slate-600 hover:text-blue-600 bg-gray-50 hover:bg-blue-50 p-1.5 rounded-md transition cursor-pointer" title="Añadir Respuesta">
+                                    <i data-lucide="message-square-text" class="w-4 h-4"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+
+            const tabla = document.getElementById('tabla-usuarios');
+            const colAcciones = document.getElementById('col-acciones');
+            
+            if (sesionActiva && sesionActiva.rol === 'admin') {
+                colAcciones.style.display = 'table-cell';
+            } else {
+                colAcciones.style.display = 'none';
+            }
+
+            tabla.innerHTML = '';
+            usuarios.forEach(u => {
+                let accionesAdmin = '';
+                if (sesionActiva && sesionActiva.rol === 'admin') {
+                    accionesAdmin = `<td class="p-3 text-right">
+                        <button onclick="cambiarPassword('${u.email}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 p-1.5 rounded-md transition cursor-pointer mr-1" title="Cambiar Contraseña">
+                            <i data-lucide="key" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="eliminarUsuario('${u.email}')" class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-1.5 rounded-md transition cursor-pointer" title="Eliminar Usuario">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </td>`;
+                }
+
+                tabla.innerHTML += `
+                    <tr>
+                        <td class="p-3 font-medium">@${u.usuario || 'N/A'}<br><span class="text-xs text-gray-400">${u.nombre}</span></td>
+                        <td class="p-3 text-gray-500">${u.email || 'N/A'}</td>
+                        <td class="p-3 text-green-600 font-bold">Autorizado</td>
+                        ${accionesAdmin}
+                    </tr>
+                `;
+            });
+
+            lucide.createIcons();
+            construirGraficoReal();
+        }
+
+        let miGrafico;
+        function construirGraficoReal() {
+            const numElectrico = reportes.filter(r => r.tipo === 'Problema Eléctrico').length;
+            const numMobiliario = reportes.filter(r => r.tipo === 'Falla de Mobiliario (Mesas/Sillas)').length;
+            const numInfra = reportes.filter(r => r.tipo === 'Infraestructura (Paredes, Ventanas)').length;
+            const numRed = reportes.filter(r => r.tipo === 'Falla de Red / Internet').length;
+
+            const ctx = document.getElementById('graficoDaños').getContext('2d');
+            if (miGrafico) miGrafico.destroy();
+
+            miGrafico = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Eléctrico', 'Mobiliario', 'Infraestructura', 'Red/Internet'],
+                    datasets: [{
+                        label: 'Número de Reportes',
+                        data: [numElectrico, numMobiliario, numInfra, numRed],
+                        backgroundColor: ['#f59e0b', '#ef4444', '#3b82f6', '#10b981'],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                }
+            });
+        }
+
+        function eliminarUsuario(email) {
+            if(confirm("¿Estás seguro de que deseas eliminar a este usuario de la base de datos?")) {
+                usuarios = usuarios.filter(u => u.email !== email);
+                localStorage.setItem('alert_users', JSON.stringify(usuarios));
+                actualizarTodo();
+            }
+        }
+
+        function cambiarPassword(email) {
+            let u = usuarios.find(u => u.email === email);
+            if (u) {
+                let nuevaPass = prompt(`Ingrese la nueva contraseña para el usuario ${u.nombre}:`);
+                if (nuevaPass !== null) {
+                    if (nuevaPass.trim().length >= 4) {
+                        u.pass = nuevaPass.trim();
+                        localStorage.setItem('alert_users', JSON.stringify(usuarios));
+                        alert("Contraseña actualizada correctamente.");
+                    } else {
+                        alert("La contraseña debe tener un mínimo de 4 caracteres.");
+                    }
+                }
+            }
+        }
+
+        function avanzarEstado(index) {
+            let r = reportes[index];
+            if (r.estado === 'Pendiente') r.estado = 'En Reparación';
+            else if (r.estado === 'En Reparación') r.estado = 'Resuelto';
+            else r.estado = 'Pendiente'; // Permite ciclar si se equivocan
+            
+            localStorage.setItem('alert_reports', JSON.stringify(reportes));
+            actualizarTodo();
+        }
+
+        function responderCaso(index) {
+            let actual = reportes[index].respuesta || '';
+            let nueva = prompt("Ingrese la respuesta u observación oficial para este caso:", actual);
+            if (nueva !== null) {
+                reportes[index].respuesta = nueva.trim();
+                localStorage.setItem('alert_reports', JSON.stringify(reportes));
+                actualizarTodo();
+            }
+        }
+
+        verificarBloqueo();
+    </script>
+</body>
+
+</html>
