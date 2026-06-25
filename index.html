@@ -4,17 +4,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AlertSalon - App Móvil</title>
+    <title>FixMySchool - App Móvil</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        html.dark body { background-color: #0f172a !important; color: #f8fafc !important; }
+        .dark .bg-white { background-color: #1e293b !important; border-color: #334155 !important; }
+        .dark .bg-gray-100, .dark .bg-gray-50 { background-color: #0f172a !important; }
+        .dark .text-gray-800 { color: #f8fafc !important; }
+        .dark .text-gray-700 { color: #e2e8f0 !important; }
+        .dark .text-gray-600 { color: #cbd5e1 !important; }
+        .dark .text-gray-500 { color: #94a3b8 !important; }
+        .dark .border-gray-200, .dark .border-gray-100 { border-color: #334155 !important; }
+        .dark .border-gray-300 { border-color: #475569 !important; }
+        .dark input, .dark select, .dark textarea { 
+            background-color: #334155 !important; 
+            color: #f8fafc !important; 
+            border-color: #475569 !important; 
+        }
+        .dark input::placeholder, .dark textarea::placeholder { color: #94a3b8 !important; }
+        .dark table tr, .dark table th, .dark table td { border-color: #334155 !important; }
+        .dark .hover\:bg-gray-100:hover, .dark .hover\:bg-gray-50:hover { background-color: #334155 !important; }
+    </style>
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
 </head>
 
 <body class="bg-gray-100 font-sans flex flex-col md:flex-row h-screen overflow-hidden">
 
     <div id="pantalla-auth" class="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-xl shadow-lg overflow-hidden p-6 md:p-8 border border-gray-200">
-            <h2 id="titulo-auth" class="text-xl md:text-2xl font-bold text-gray-800 text-center mb-1">Acceso AlertSalon</h2>
+            <h2 id="titulo-auth" class="text-xl md:text-2xl font-bold text-gray-800 text-center mb-1">Acceso FixMySchool</h2>
             <p class="text-xs text-gray-500 text-center mb-6">Uso institucional. Ingrese con su correo electrónico.</p>
 
             <form id="form-auth" class="space-y-4">
@@ -54,7 +78,7 @@
         <div>
             <div
                 class="p-4 bg-slate-950 font-bold text-lg flex items-center justify-between text-amber-400 border-b border-slate-800">
-                <span class="flex items-center gap-2"><i data-lucide="wrench"></i> AlertSalon</span>
+                <span class="flex items-center gap-2"><i data-lucide="wrench"></i> FixMySchool</span>
                 <button onclick="cerrarSesion()" class="md:hidden text-red-400 p-1">
                     <i data-lucide="log-out" class="w-5 h-5"></i>
                 </button>
@@ -98,12 +122,16 @@
 
     <main id="contenido-app" class="hidden flex-1 flex flex-col overflow-y-auto">
         <header
-            class="bg-white shadow-sm h-14 md:h-16 flex items-center justify-between px-4 md:px-8 border-b border-gray-200 shrink-0">
+            class="bg-white shadow-sm h-14 md:h-16 flex items-center justify-between px-4 md:px-8 border-b border-gray-200 shrink-0 transition-colors">
             <h1 id="titulo-pagina" class="text-base md:text-xl font-bold text-gray-800">Panel / Resumen</h1>
-            <div class="relative cursor-pointer p-2 rounded-full hover:bg-gray-100" onclick="cambiarSeccion('inicio')">
-                <i data-lucide="bell" class="text-gray-600 w-5 h-5"></i>
-                <span
-                    class="absolute top-1 right-1 bg-amber-500 w-2.5 h-2.5 rounded-full ring-2 ring-white animate-pulse"></span>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors" title="Modo Oscuro">
+                    <i data-lucide="moon" id="icono-dark" class="w-5 h-5"></i>
+                </button>
+                <div class="relative cursor-pointer p-2 rounded-full hover:bg-gray-100 transition-colors" onclick="cambiarSeccion('inicio')" title="Notificaciones">
+                    <i data-lucide="bell" class="text-gray-600 w-5 h-5"></i>
+                    <span class="absolute top-1 right-1 bg-amber-500 w-2.5 h-2.5 rounded-full ring-2 ring-white animate-pulse"></span>
+                </div>
             </div>
         </header>
 
@@ -288,14 +316,14 @@
                 document.getElementById('auth-email').required = false;
                 btnAuth.innerText = "Ingresar al Sistema";
                 toggleText.innerHTML = '¿No tienes cuenta? <a href="#" onclick="toggleAuthMode()" class="text-amber-600 hover:underline">Regístrate aquí</a>';
-                tituloAuth.innerText = "Acceso AlertSalon";
+                tituloAuth.innerText = "Acceso FixMySchool";
             } else {
                 divNombre.classList.remove('hidden');
                 divEmail.classList.remove('hidden');
                 document.getElementById('auth-email').required = true;
                 btnAuth.innerText = "Registrarse";
                 toggleText.innerHTML = '¿Ya tienes cuenta? <a href="#" onclick="toggleAuthMode()" class="text-amber-600 hover:underline">Inicia Sesión</a>';
-                tituloAuth.innerText = "Registro AlertSalon";
+                tituloAuth.innerText = "Registro FixMySchool";
             }
         }
 
@@ -322,6 +350,18 @@
                 return;
             }
 
+            const regexUsuario = /^[a-zA-Z0-9_.@]+$/;
+            if (inputUsuario !== 'admin' && !regexUsuario.test(inputUsuario)) {
+                alert("El nombre de usuario o correo contiene caracteres no permitidos (sin emojis).");
+                return;
+            }
+
+            const regexPass = /^[a-zA-Z0-9!@#$%^&*()_+=\-{}[\]:;"'<>,.?/]+$/;
+            if (!regexPass.test(pass)) {
+                alert("La contraseña contiene caracteres no válidos o emojis. Solo use letras, números y símbolos estándar.");
+                return;
+            }
+
             // Buscar si ya existe el usuario o correo antiguo en la base
             let usuarioExistente = usuarios.find(u => u.usuario === inputUsuario || (!u.usuario && u.email === inputUsuario));
 
@@ -345,15 +385,21 @@
                     return;
                 }
                 
-                const filtroCorreo = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|net)$/;
+                const filtroCorreo = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
                 if (!filtroCorreo.test(inputEmail)) {
-                    alert("Por favor ingrese un correo válido que termine en .com o .net");
+                    alert("Por favor ingrese un correo válido sin emojis ni caracteres especiales.");
                     return;
                 }
 
                 let correoExistente = usuarios.find(u => u.email === inputEmail);
                 if (correoExistente) {
                     alert("Este correo electrónico ya está registrado. Inicie sesión o utilice otro.");
+                    return;
+                }
+
+                const filtroUsuario = /^[a-zA-Z0-9_]+$/;
+                if (!filtroUsuario.test(inputUsuario)) {
+                    alert("El usuario solo puede contener letras, números y guiones bajos (sin emojis).");
                     return;
                 }
 
@@ -663,6 +709,20 @@
                 localStorage.setItem('alert_reports', JSON.stringify(reportes));
                 actualizarTodo();
             }
+        }
+
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.getElementById('icono-dark').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+            lucide.createIcons();
+        }
+
+        // Configurar icono al inicio
+        if (document.documentElement.classList.contains('dark')) {
+            const icon = document.getElementById('icono-dark');
+            if (icon) icon.setAttribute('data-lucide', 'sun');
         }
 
         verificarBloqueo();
