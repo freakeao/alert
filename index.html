@@ -26,6 +26,45 @@
         .dark input::placeholder, .dark textarea::placeholder { color: #94a3b8 !important; }
         .dark table tr, .dark table th, .dark table td { border-color: #334155 !important; }
         .dark .hover\:bg-gray-100:hover, .dark .hover\:bg-gray-50:hover { background-color: #334155 !important; }
+
+        /* === SPLASH SCREEN === */
+        #splash-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: #0f172a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        #splash-screen.fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
+        #splash-screen img {
+            width: 110px;
+            height: 110px;
+            object-fit: contain;
+            animation: logo-spin 1.2s linear infinite;
+            filter: drop-shadow(0 0 18px rgba(245, 158, 11, 0.6));
+        }
+        #splash-screen p {
+            color: #94a3b8;
+            font-size: 13px;
+            letter-spacing: 0.08em;
+            animation: pulse-text 1.2s ease-in-out infinite;
+        }
+        @keyframes logo-spin {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+        @keyframes pulse-text {
+            0%, 100% { opacity: 0.4; }
+            50%       { opacity: 1; }
+        }
     </style>
     <script>
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -35,6 +74,12 @@
 </head>
 
 <body class="bg-gray-100 font-sans flex flex-col md:flex-row h-screen overflow-hidden">
+
+    <!-- SPLASH SCREEN -->
+    <div id="splash-screen">
+        <img src="logo/logo.png" alt="FixMySchool Logo">
+        <p>Cargando FixMySchool...</p>
+    </div>
 
     <div id="pantalla-auth" class="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-xl shadow-lg overflow-hidden p-6 md:p-8 border border-gray-200">
@@ -754,6 +799,17 @@
         }
 
         verificarBloqueo();
+
+        // === OCULTAR SPLASH SCREEN ===
+        window.addEventListener('load', function () {
+            setTimeout(function () {
+                const splash = document.getElementById('splash-screen');
+                if (splash) {
+                    splash.classList.add('fade-out');
+                    setTimeout(() => splash.remove(), 500);
+                }
+            }, 1500);
+        });
     </script>
 </body>
 
